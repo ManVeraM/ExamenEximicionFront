@@ -23,6 +23,8 @@ const App = () =>{
   const[ActiveTable, setActiveTable] = useState(0)
   const [userToDelete, setUserToDelete] = useState(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
+  const [reportData, setReportData] = useState(null);
 
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -31,10 +33,10 @@ const App = () =>{
     name: "",
   });
 
-
   const handleDialogOpen = () => {
     setIsDialogOpen(true);
   };
+  
   const handleDialogClose = () => {
     setIsDialogOpen(false);
   };
@@ -100,6 +102,21 @@ const App = () =>{
       });
   };
 
+  const handleReportDialogOpen = (userId) => {
+    setIsReportDialogOpen(true);
+  
+    // Realiza la solicitud al backend para obtener el reporte del usuario
+    axios
+      .get(`http://localhost:5104/api/UserReservations/${userId}`)
+      .then((response) => {
+        // Actualiza el estado con los datos del reporte
+        setReportData(response.data);
+      })
+      .catch((error) => {
+        console.error("Error al obtener el reporte del usuario:", error);
+      });
+  };
+
   
 
   return (
@@ -134,9 +151,13 @@ const App = () =>{
                       >
                         Eliminar
                       </Button>
-                    <Button variant="contained" style={{ marginRight: "10px" }} >
-                      Reporte
-                    </Button>
+                      <Button
+                        variant="contained"
+                        style={{ marginRight: "10px" }}
+                        onClick={() => handleReportDialogOpen(user.id)}
+                      >
+                        Reporte
+                      </Button>
                     </TableCell>
                   
               </TableRow>
@@ -183,6 +204,24 @@ const App = () =>{
       <DialogActions>
         <Button onClick={handleDeleteDialogClose}>Cancelar</Button>
         <Button onClick={confirmDeleteUser}>Eliminar</Button>
+      </DialogActions>
+    </Dialog>
+
+    <Dialog open={isReportDialogOpen} onClose={() => setIsReportDialogOpen(false)}>
+      <DialogTitle>Reporte del Usuario</DialogTitle>
+      <DialogContent>
+        {reportData ? (
+          <div>
+            <p>Nombre del Usuario: {reportData.userName}</p>
+            <p>Reservaciones del Último Mes: {reportData.reservationsLastMonth}</p>
+            <p>Reservaciones del Último Año: {reportData.reservationsLastYear}</p>
+          </div>
+        ) : (
+          <p>Cargando datos del reporte...</p>
+        )}
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={() => setIsReportDialogOpen(false)}>Cerrar</Button>
       </DialogActions>
     </Dialog>
     </div>
