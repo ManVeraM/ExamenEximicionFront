@@ -32,7 +32,9 @@ const App = () =>{
   });
 
 
-
+  const handleDialogOpen = () => {
+    setIsDialogOpen(true);
+  };
   const handleDialogClose = () => {
     setIsDialogOpen(false);
   };
