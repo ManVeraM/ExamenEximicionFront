@@ -24,15 +24,14 @@ const App = () =>{
   const [userToDelete, setUserToDelete] = useState(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
+
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [newUserData, setNewUserData] = useState({
     id: "",
     name: "",
   });
 
-  const handleDialogOpen = () => {
-    setIsDialogOpen(true);
-  };
+
 
   const handleDialogClose = () => {
     setIsDialogOpen(false);
