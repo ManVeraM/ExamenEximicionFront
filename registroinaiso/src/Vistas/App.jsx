@@ -25,6 +25,9 @@ const App = () =>{
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
   const [reportData, setReportData] = useState(null);
+  const [reportYear, setReportYear] = useState("");
+  const [reportMonth, setReportMonth] = useState("");
+  const [selectedUserId, setSelectedUserId] = useState(null);
 
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -103,17 +106,29 @@ const App = () =>{
   };
 
   const handleReportDialogOpen = (userId) => {
+    setSelectedUserId(userId);
     setIsReportDialogOpen(true);
-  
-    // Realiza la solicitud al backend para obtener el reporte del usuario
+  };
+
+  const handleReportDialogClose = () => {
+    setIsReportDialogOpen(false);
+    setReportYear("");
+    setReportMonth("");
+  };
+
+  const handleGenerateReport = () => {
+    // Realiza la solicitud al backend para obtener el reporte
     axios
-      .get(`http://localhost:5104/api/UserReservations/${userId}`)
+      .get(
+        `http://localhost:5104/api/UserReservations/${selectedUserId}?year=${reportYear}&month=${reportMonth}`
+      )
       .then((response) => {
         // Actualiza el estado con los datos del reporte
         setReportData(response.data);
+        setIsReportDialogOpen(false); // Cierra el diálogo
       })
       .catch((error) => {
-        console.error("Error al obtener el reporte del usuario:", error);
+        console.error("Error al obtener el reporte:", error);
       });
   };
 
@@ -207,23 +222,48 @@ const App = () =>{
       </DialogActions>
     </Dialog>
 
-    <Dialog open={isReportDialogOpen} onClose={() => setIsReportDialogOpen(false)}>
-      <DialogTitle>Reporte del Usuario</DialogTitle>
-      <DialogContent>
-        {reportData ? (
-          <div>
-            <p>Nombre del Usuario: {reportData.userName}</p>
-            <p>Reservaciones del Último Mes: {reportData.reservationsLastMonth}</p>
-            <p>Reservaciones del Último Año: {reportData.reservationsLastYear}</p>
-          </div>
-        ) : (
-          <p>Cargando datos del reporte...</p>
-        )}
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={() => setIsReportDialogOpen(false)}>Cerrar</Button>
-      </DialogActions>
-    </Dialog>
+    <Dialog open={isReportDialogOpen} onClose={handleReportDialogClose}>
+        <DialogTitle>Generar Reporte</DialogTitle>
+        <DialogContent>
+          <TextField
+            label="Año"
+            type="number"
+            value={reportYear}
+            onChange={(e) => setReportYear(e.target.value)}
+            fullWidth
+            margin="normal"
+          />
+          <TextField
+            label="Mes"
+            type="number"
+            value={reportMonth}
+            onChange={(e) => setReportMonth(e.target.value)}
+            fullWidth
+            margin="normal"
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleReportDialogClose}>Cancelar</Button>
+          <Button onClick={handleGenerateReport}>Generar</Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog open={Boolean(reportData)} onClose={() => setReportData(null)}>
+        <DialogTitle>Reporte del Usuario</DialogTitle>
+        <DialogContent>
+          {reportData ? (
+            <div>
+              <p>Nombre del Usuario: {reportData.userName}</p>
+              <p>Reservaciones del Último Mes: {reportData.reservationsLastMonth}</p>
+              <p>Reservaciones del Último Año: {reportData.reservationsLastYear}</p>
+            </div>
+          ) : (
+            <p>Cargando datos del reporte...</p>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setReportData(null)}>Cerrar</Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 };
